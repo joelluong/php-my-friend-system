@@ -1,0 +1,12 @@
+body  {
+    background-image: url("../images/bg1.jpg");
+    background-attachment: fixed;
+    font-family: arial, san-serif;
+}
+
+a.disabled {
+    /* Make the disabled links grayish*/
+    color: gray;
+    /* And disable the pointer events */
+    pointer-events: none;
+}
