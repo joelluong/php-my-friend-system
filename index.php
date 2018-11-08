@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <meta name="description" content="Web application development" />
-        <meta name="keywords" content="Assignment1" />
+        <meta name="keywords" content="Assignment2" />
         <meta name="author" content="Dai Trung Duong Luong" />
         <link href="library/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
         <link href="library/bootstrap/css/bootstrap-grid.min.css" rel="stylesheet" />
@@ -70,24 +70,11 @@
 <?php
 require("Database.php");
 
-$pdo = new Database();
+$pdo = new Database(); // call php data object
 $friendTableName = "friends";
 $myfriendsTableName = "myfriends";
 
-//## 2. set up SQL string and execute
-// echo tableExists($friendTableName);
-//if ($pdo->tableExists($friendTableName)){
-//    echo "Friends Exist";
-//} else {
-//    echo "Friends Not Exist";
-//}
-
-//if ($pdo->tableExists($myfriendsTableName)){
-//    echo "My Friends Exist";
-//} else {
-//    echo "My Friends Not Exist";
-//}
-
+// query to create friends table
 $queryCreateFriendsTable = "
 CREATE TABLE friends(
 friend_id int NOT NULL AUTO_INCREMENT,
@@ -101,6 +88,7 @@ UNIQUE (friend_email)
 );
 ";
 
+// query to insert data into friends table
 $queryFriendsTableInsert = "INSERT INTO friends (friend_email, password, profile_name, date_started, num_of_friends) VALUES
 ('duong@aic.com', 'admin', 'Duong', '2012-9-22', 3),
 ('luong@aic.com', 'admin', 'Luong', '2012-8-19', 3),
@@ -114,27 +102,35 @@ $queryFriendsTableInsert = "INSERT INTO friends (friend_email, password, profile
 ('wijaya@aic.com', 'admin', 'Wijaya', '1994-11-14', 2)
 ";
 
-if (!$pdo->tableExists($friendTableName)){
+
+if (!$pdo->tableExists($friendTableName)){ // firstly, check is that friend table is exist or not
+    // if not, create new friends table
     $pdo->query($queryCreateFriendsTable);
     $pdo->execute();
+
+    // insert data into friends table
     $pdo->query($queryFriendsTableInsert);
     $pdo->execute();
 }
 
+// query to create my friends table
 $queryCreateMyFriendsTable = "
 CREATE TABLE myfriends (
 friend_id1 int NOT NULL,
 friend_id2 int NOT NULL,
 UNIQUE (friend_id1, friend_id2)
-);
-";
-$queryMyFriendsTableInsert = "INSERT INTO myfriends (friend_id1, friend_id2) VALUES (1,2), (1,10), (1,5), (2,1), (2,7), (2,10), (3,5),
-(3,6), (3,7), (4,5), (4,9), (5,3), (5,4), (5,1), (6,3), (7,2), (7,3), (9,4), (10,1), (10,2);
-";
+);";
 
-if (!$pdo->tableExists($myfriendsTableName)){
+// query to insert data into friends table
+$queryMyFriendsTableInsert = "INSERT INTO myfriends (friend_id1, friend_id2) VALUES (1,2), (1,10), (1,5), (2,1), (2,7), (2,10), (3,5),
+(3,6), (3,7), (4,5), (4,9), (5,3), (5,4), (5,1), (6,3), (7,2), (7,3), (9,4), (10,1), (10,2);";
+
+if (!$pdo->tableExists($myfriendsTableName)){ // firstly, check is that my friend table is exist or not
+    // if not, create new my friends table
     $pdo->query($queryCreateMyFriendsTable);
     $pdo->execute();
+
+    // insert data into my friends table
     $pdo->query($queryMyFriendsTableInsert);
     $pdo->execute();
 }

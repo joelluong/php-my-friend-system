@@ -11,7 +11,7 @@
     <head>
         <meta charset="utf-8" />
         <meta name="description" content="Web application development" />
-        <meta name="keywords" content="Assignment1" />
+        <meta name="keywords" content="Assignment2" />
         <meta name="author" content="Dai Trung Duong Luong" />
         <link href="library/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
         <link href="library/bootstrap/css/bootstrap-grid.min.css" rel="stylesheet" />
@@ -34,18 +34,40 @@
                         <ul>
                             <li>What tasks you have not attempted or not completed?
                                 <ul>
-                                    <li>I have attempt and completed all the tasks in this assignment</li>
+                                    <li class="text-success">I have attempt and completed all the tasks in this assignment</li>
                                 </ul>
                             </li>
                             <li>What special features have you done, or attempted, in creating the site that we should know about?
                                 <ul>
-                                    <li>Using Bootstrap framework for styling the web pages.</li>
-                                    <li>Using PHP Data Object (PDO) to access database.</li>
+                                    <li class="text-success">Using Bootstrap framework for styling the web pages.</li>
+                                    <li class="text-success">Using PHP Data Object (PDO) to access database
+                                        <ul>
+                                            <li class="text-warning">PHP will automatically close the connection when my script ends - <a href="http://php.net/manual/en/pdo.connections.php" target="_blank"> Reference </a></li>
+                                            <li class="text-warning">Help my code quite clear and easy to read</li>
+                                        </ul>
+                                    </li>
                                 </ul>
                             </li>
-                            <li>Which parts did you have trouble with?</li>
-                            <li>What would you like to do better next time?</li>
-                            <li>What additional features did you add to the assignment? (if any)</li>
+                            <li>Which parts did you have trouble with?
+                                <ul>
+                                    <li class="text-success">I did not have any trouble during this assignment</li>
+                                </ul>
+                            </li>
+
+                            <li>What would you like to do better next time?
+                                <ul>
+                                    <li class="text-success">I would apply Model-View-Controller (MVC)</li>
+                                    <li class="text-success">I would add more styles, make my assignment 2 can used on mobile devices</li>
+                                    <li class="text-success">Push to Github for my portfolio</li>
+                                </ul>
+                            </li>
+
+                            <li>What additional features did you add to the assignment? (if any)
+                                <ul>
+                                    <li class="text-success">Just only Bootstrap and PHP Data Object (PDO)</li>
+                                </ul>
+                            </li>
+
                         </ul>
                     </div>
                 </div>
@@ -71,7 +93,7 @@
                 <div class="row">
                     <div class="col-12">
                         <ul>
-                            <li>I did not participate in the discussion board because I often go to tutorials and lectures so I had a chance to meet the teaching team to clarify ambiguous requirements in the assignment 1.</li>
+                            <li>I did not participate in the discussion board because I often go to tutorials and lectures so I had a chance to meet the teaching team to clarify ambiguous requirements in the assignment 2.</li>
                         </ul>
                     </div>
                 </div>

@@ -1,7 +1,6 @@
 <?php
 require("Database.php");
 session_start();
-// https://board.phpbuilder.com/d/10312177-php-to-take-action-upon-button-click
 if (!isset ($_SESSION["profile_name"])) { // check if session variable exists
     $_SESSION["profile_name"] = ""; // create the session variable
 }
@@ -9,6 +8,11 @@ if (!isset ($_SESSION["profile_name"])) { // check if session variable exists
 if (!isset ($_SESSION["email"])) { // check if session variable exists
     $_SESSION["email"]= ""; // create the session variable
 }
+
+if (!isset($_SESSION["isLogInSuccessful"])){  // check if session variable exists
+    $_SESSION["isLogInSuccessful"] = false; // create the session variable
+}
+$isLogInSuccessful = $_SESSION["isLogInSuccessful"]; // false
 ?>
 
 <!DOCTYPE html>
@@ -43,12 +47,13 @@ if (!isset ($_SESSION["email"])) { // check if session variable exists
                 if (isset($_POST["reset"]))
                 {
                     $_SESSION = array(); // unset all session variables
+                    session_unset();
                     session_destroy();
                     echo "<meta http-equiv='refresh' content='0'>";
                 }
 
                 // if the form submit
-                if ($_POST['submit']){
+                if (isset($_POST['submit'])){
                     $allFieldsMeetRequirements = true;
                     // pattern for input form
                     $emailPattern = "/\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,6}/";
@@ -61,15 +66,16 @@ if (!isset ($_SESSION["email"])) { // check if session variable exists
                     $data_not_null = !empty($_POST["email"]) && !empty($_POST["profile_name"]) && !empty($_POST["password"]) && !empty($_POST["repassword"]);
 
 
-                    // check it mandatory field is not NULL
+                    // check if mandatory fields are not NULL
                     if ($data_not_null && $data_exist){
+                        // set up session variables
                         $_SESSION["profile_name"] = $_POST["profile_name"];
-                        $_SESSION["email"] = $_POST["email"];
-                        $_SESSION["password"] = $_POST["password"];
+                        $_SESSION["email"] = $_POST["email"]; // also save and send email session variable to friendadd.php
 
+                        // set up local variables
                         $profile_name = $_SESSION["profile_name"];
-                        $password = $_SESSION["password"];
                         $email = $_SESSION["email"];
+                        $password = $_POST["password"];
 
                         // check if email match to regular expression
                         if (!preg_match($emailPattern, $_POST["email"])){
@@ -89,27 +95,28 @@ if (!isset ($_SESSION["email"])) { // check if session variable exists
                             $allFieldsMeetRequirements = false;
                         }
 
+                        // check if password and re-password is a match or not
                         if ($_POST["password"] != $_POST["repassword"]){
                             echo "<div class='row'><div class='col-12 text-danger text-center'><p>ERROR: Password does not not match confirm password!!!</p></div></div>";
                             $allFieldsMeetRequirements = false;
                         }
 
-                        if ($allFieldsMeetRequirements){
-                            $pdo = new Database();
+                        if ($allFieldsMeetRequirements){ // check if all input fields meet requirements
+                            $pdo = new Database(); // create PHP data object
                             $friendTableName = "friends";
                             $myfriendsTableName = "myfriends";
 
-                            if ($pdo->tableExists($friendTableName)){
+                            if ($pdo->tableExists($friendTableName)){// check if friends table exist or not
+                                // we need to check if input email already existed in the table or not
                                 $queryCheckDuplicatedEmail = "SELECT * FROM friends WHERE friend_email= :friend_email";
                                 $pdo->query($queryCheckDuplicatedEmail);
                                 $pdo->bind(':friend_email', $email);
                                 $resultQueryCheckDuplicatedEmail= $pdo->resultset();
 
-                                print_r($resultQueryCheckDuplicatedEmail);
-                                echo count($resultQueryCheckDuplicatedEmail);
-                                if (count($resultQueryCheckDuplicatedEmail)!=0){
+                                if (count($resultQueryCheckDuplicatedEmail)!=0){ // check if input email already existed in the table or not (should be greater than 0)
                                     echo "<div class='row'><div class='col-12 text-danger text-center'><p>Email $email already existed!!!</p></div></div>";
                                } else {
+                                    // email not exist in the friends table, then insert a value inside friends table
                                     $queryFriendsTableInsert = "INSERT INTO friends (friend_email, password, profile_name, date_started, num_of_friends) VALUES
 (:friend_email, :password, :profile_name, :date_started, :num_of_friends)";
                                     $pdo->query($queryFriendsTableInsert);
@@ -127,7 +134,7 @@ if (!isset ($_SESSION["email"])) { // check if session variable exists
                             }
 
                             if ($isLogInSuccessful){
-                                $_SESSION["isLogInSuccessful"]=true;
+                                $_SESSION["isLogInSuccessful"]=true; // send session variable to friendadd.php
                                 header('Location: friendadd.php');
                             }
                         }
@@ -145,7 +152,7 @@ if (!isset ($_SESSION["email"])) { // check if session variable exists
                         <div class="col-md-9">
                             <input type="text" class="form-control" name="email" id="email" maxlength="50" value = "<?php
                             if (isset ($_SESSION["email"])) { // check if session variable exists
-                                echo $_SESSION["email"]; // create the session variable
+                                echo $_SESSION["email"]; // print the session variable to value
                             } else {
                                 echo "";
                             }
@@ -158,7 +165,7 @@ if (!isset ($_SESSION["email"])) { // check if session variable exists
                         <div class="col-md-9">
                             <input type="text" class="form-control" name="profile_name" id="profile_name" value = "<?php
                             if (isset ($_SESSION["profile_name"])) { // check if session variable exists
-                                echo $_SESSION["profile_name"]; // create the session variable
+                                echo $_SESSION["profile_name"]; // print the session variable to value
                             } else {
                                 echo "";
                             }

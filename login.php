@@ -5,21 +5,17 @@ if (!isset ($_SESSION["email"])) { // check if session variable exists
     $_SESSION["email"]= ""; // create the session variable
 }
 
-if (!isset ($_SESSION["password"])) { // check if session variable exists
-    $_SESSION["password"]= ""; // create the session variable
+if (!isset($_SESSION["isLogInSuccessful"])){  // check if session variable exists
+    $_SESSION["isLogInSuccessful"] = false; // create the session variable
 }
-
-if (!isset($_SESSION["isLogInSuccessful"])){
-    $_SESSION["isLogInSuccessful"] = true;
-}
-$isLogInSuccessful = false;
+$isLogInSuccessful = $_SESSION["isLogInSuccessful"];
 ?>
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8" />
         <meta name="description" content="Web application development" />
-        <meta name="keywords" content="Assignment1" />
+        <meta name="keywords" content="Assignment2" />
         <meta name="author" content="Dai Trung Duong Luong" />
         <title>Assignment 2</title>
         <link href="library/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
@@ -41,38 +37,39 @@ $isLogInSuccessful = false;
                 </div>
 
                 <?php
-                // if the form reset, delete all session variable to make input fields clear
+                // if the form reset, delete all session variable and refresh to make input fields clear
                 if (isset($_POST["reset"]))
                 {
                     $_SESSION = array(); // unset all session variables
+                    session_unset();
                     session_destroy();
                     echo "<meta http-equiv='refresh' content='0'>";
                 }
 
                 // if the form submit
-                if ($_POST['submit']){
+                if (isset($_POST['submit'])){
                     // check if form data exists
                     $data_exist = isset($_POST["email"]) && isset($_POST["password"] );
                     $data_not_null = !empty($_POST["email"]) && !empty($_POST["password"]);
 
-                    // check it mandatory field is not NULL
+                    // check if mandatory fields are not NULL
                     if ($data_not_null && $data_exist){
                         $email = $_POST["email"];
                         $password = $_POST["password"];
                         $_SESSION["email"] = $email;
 
-                        $pdo = new Database();
+                        $pdo = new Database(); // call php data object
                         $friendTableName = "friends";
                         $myfriendsTableName = "myfriends";
 
-                        if ($pdo->tableExists($friendTableName)){
+                        if ($pdo->tableExists($friendTableName)){ // check if friends table exist or not
                             $querySQL = "SELECT password FROM friends WHERE friend_email=:friend_email";
                             $pdo->query($querySQL);
                             $pdo->bind(':friend_email', $email);
-                            $row =  $pdo->resultset();
-                            print_r($row);
-                            if (count($row)!=0){
-                                if ($row[0]['password'] == $password){
+
+                            $rows =  $pdo->resultset(); // only one record is received
+                            if (count($rows)!=0){
+                                if ($rows[0]['password'] == $password){
                                     $isLogInSuccessful = true;
                                 } else {
                                     echo "<div class='row'><div class='col-12 text-danger text-center'><p>Password or email is wrong!!!</p></div></div>";
@@ -81,14 +78,15 @@ $isLogInSuccessful = false;
                                 echo "<div class='row'><div class='col-12 text-danger text-center'><p>Email $email is not existed!!!</p></div></div>";
                             }
                         } else {
-                            echo "<div class='row'><div class='col-12 text-danger text-center'><p>Friends Table is not exist!!!</p></div></div>";
+                            echo "<div class='row'><div class='col-12 text-danger text-center'><p>Friends Table is not exist, please go to the home page!!!</p></div></div>";
                         }
 
-                        if ($isLogInSuccessful){
-                            $_SESSION["email"] = $email;
-                            $_SESSION["isLogInSuccessful"] = $isLogInSuccessful;
+                        if ($isLogInSuccessful){ // if log in is successful
+                            $_SESSION["email"] = $email; // send session variable to friendlist.php
+                            $_SESSION["isLogInSuccessful"] = $isLogInSuccessful; // send session variable to friendlist.php
                             header('Location: friendlist.php');
                         }
+
                     } else{
                         echo "<div class='row'><div class='col-12 text-danger text-center'><p>ERROR: Please input all fields in the form!!!</p></div></div>";
                     }

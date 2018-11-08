@@ -5,12 +5,12 @@ class Database{
 	private $pass	= '200995';
 	private $dbname	= 's101051766_db';
 
-	private $dbh;
-	private $error;
-	private $stmt;
+	private $dbh; // database handler
+	private $error; // property for error
+	private $stmt; // for statement property
 
     public function __construct(){
-        // Set DSN
+        // Set DSN: Data Source Name to connect to database
         $dsn = 'mysql:host='. $this->host . ';dbname='. $this->dbname;
         // Set Options
         $options = array(
@@ -70,13 +70,13 @@ class Database{
         // Try a select statement against the table
         // Run it in try/catch in case PDO is in ERRMODE_EXCEPTION.
         try {
-            $result = $this->query("SELECT 1 FROM $table LIMIT 1");
+            $this->query("SELECT 1 FROM $table LIMIT 1");
             $rows = $this->resultset();
         } catch (Exception $e) {
             // We got an exception == table not found
             return false;
-        }
+        } 
         // Result is either boolean FALSE (no table found) or PDOStatement Object (table found)
-        return rows[0] !== false;
+		return $rows[0][1];
     }
 }

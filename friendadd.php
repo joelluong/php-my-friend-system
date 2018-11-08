@@ -9,14 +9,6 @@
     <link href="library/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
     <link href="library/bootstrap/css/bootstrap-grid.min.css" rel="stylesheet" />
     <link href="css/custom.css" rel="stylesheet" />
-    <style>
-        a.disabled {
-            /* Make the disabled links grayish*/
-            color: gray;
-            /* And disable the pointer events */
-            pointer-events: none;
-        }
-    </style>
 </head>
 <body>
     <div class="container">
@@ -34,26 +26,27 @@
              * Date: 7/10/2018
              * Time: 7:05 PM
              */
-            require_once("settings.php");
             require("Database.php");
 
             session_start(); // start the session
-            if (!isset($_SESSION["isLogInSuccessful"])){
-                $_SESSION["isLogInSuccessful"] = false;
+            if (!isset($_SESSION["isLogInSuccessful"])){ // check if session variable exists
+                $_SESSION["isLogInSuccessful"] = false; // create the session variable
             }
-
-            $email = $_SESSION["email"];
-            $isLogInSuccessful = $_SESSION["isLogInSuccessful"];
+            $isLogInSuccessful = $_SESSION["isLogInSuccessful"];    // get the session variable
 
             if ($isLogInSuccessful){
-                $pdo = new Database();
+				$email = $_SESSION["email"];    // get the session variable
+                $pdo = new Database();  // call php data object
                 $friendTableName = "friends";
                 $myfriendsTableName = "myfriends";
 
-                if ($_POST['add']){
-                    $friend_id = $_POST['friend_id'];
-                    $add_friend_id = $_POST['add_friend_id'];
-                    $num_of_friends_update = $_POST['update_friend_number']+1;
+                // add friends, if user want to add
+                if (isset($_POST['add'])){
+                    $friend_id = $_POST['friend_id'];   // retrieve my id
+                    $add_friend_id = $_POST['add_friend_id'];   // retrieve my friend's id
+                    $num_of_friends_update = $_POST['update_friend_number']+1;  // retrieve the number of friends and plus 1
+
+                    // add friend
                     $queryAddFriend = "INSERT INTO myfriends (friend_id1, friend_id2) VALUE (:friend_id1,:friend_id2);";
                     $pdo->query($queryAddFriend);
                     $pdo->bind(':friend_id1', $friend_id);
@@ -67,12 +60,14 @@
                     $pdo->execute();
                 }
 
+                // check if two table exist
                 if ($pdo->tableExists($friendTableName) && $pdo->tableExists($myfriendsTableName)){
+                    // find yourself based on your email
                     $queryFriendsTableSelect = "SELECT friend_id, profile_name, num_of_friends FROM friends WHERE friend_email=:friend_email";
                     $pdo->query($queryFriendsTableSelect);
                     $pdo->bind(':friend_email', $email);
                     $rows = $pdo->resultset();
-                    if (count($rows) != 0){
+                    if (count($rows) != 0){ // check if input email already existed in the table or not (should be equal to 1)
                         $id = $rows[0]['friend_id'];
                         $name = $rows[0]['profile_name'];
                         $num_of_friends = $rows[0]['num_of_friends'];
@@ -107,35 +102,24 @@
                         $pdo->bind(':friend_id', $id);
                         $strangerPaginationRows = $pdo->resultset();
 
-//                        echo "First Result: ";
-//                        print_r($strangerPaginationRows);
-//                        echo "<br>".count($strangerPaginationRows);
-
+                        // add a relation_count key into stranger pagination rows and assign value 0 to them
+						 for ($i=0;$i<count($strangerPaginationRows);$i++){
+							$strangerPaginationRows[$i]["relation_count"] = 0;
+						}
 
                         // retrieve selected results from database and display them on page
                         $sqlQuery = "SELECT r1.friend_id1 AS user1, r2.friend_id1 as user2, f.profile_name, COUNT(r1.friend_id2) as relation_count FROM myfriends r1 INNER JOIN myfriends r2 ON r1.friend_id2 = r2.friend_id2 AND r1.friend_id1 <> r2.friend_id1 AND r1.friend_id1=:friend_id1 INNER JOIN friends f ON f.friend_id = r2.friend_id1 GROUP BY r1.friend_id1, r2.friend_id1";
                         $pdo->query($sqlQuery);
                         $pdo->bind(':friend_id1', $id);
-                        $resultCountMutualRows = $pdo->resultset();
-//                        echo "<br><br>Count Result: ";
-//                        print_r($resultCountMutualRows);
-//                        echo "<br>".count($resultCountMutualRows);
+                        $resultCountMutualRows = $pdo->resultset(); // the purpose is get the number of mutual friends and then add it into relation_count key of $strangerPaginationRows
+
                         for ($i=0;$i<count($strangerPaginationRows);$i++){
-                            $haveMutualFriends= false;
                             for ($j=0;$j<count($resultCountMutualRows);$j++){
-                                if ($strangerPaginationRows[$i]["friend_id"] == $resultCountMutualRows[$j]["user2"]){
-                                    $strangerPaginationRows[$i]["relation_count"] = $resultCountMutualRows[$j]["relation_count"];
-                                    $haveMutualFriends= true;
-                                }
-                                if ($haveMutualFriends== false){
-                                    $strangerPaginationRows[$i]["relation_count"] = 0;
-                                }
+                                if ($strangerPaginationRows[$i]["friend_id"] == $resultCountMutualRows[$j]["user2"]){ // compare friend id of each result row
+                                    $strangerPaginationRows[$i]["relation_count"] = $resultCountMutualRows[$j]["relation_count"]; // update the number of mutual friends
+                                } // if don't have any mutual friends,  $strangerPaginationRows[$i]["relation_count"] still equal to 0
                             }
                         }
-//                        echo "<br><br>Final Result: ";
-//                        print_r($strangerPaginationRows);
-//                        echo "<br>".count($strangerPaginationRows);
-
                     } else {
                         echo "<div class='row'><div class='col-12 text-danger text-center'><p>Email $email is not existed!!!</p></div></div>";
                     }
@@ -145,7 +129,7 @@
             }
             ?>
 
-            <? if ($isLogInSuccessful): ?>
+            <?php if ($isLogInSuccessful): ?>
                 <div class="row">
                     <div class="col-12 text-center">
                         <h3><?php echo $name ?>'s Friend List Page</h3>
@@ -177,9 +161,9 @@
                     <div class="col-6 text-center">
                         <?php
                         if ($page == 1){
-                            echo '<a class="disabled" href="friendadd.php?page='.($page-1).'">'.Previous.'</a>';
+                            echo '<a class="disabled" href="friendadd.php?page='.($page-1).'">Previous</a>';
                         } else{
-                            echo '<a href="friendadd.php?page='.($page-1).'">'.Previous.'</a>';
+                            echo '<a href="friendadd.php?page='.($page-1).'">Previous</a>';
                         }
                         ?>
                     </div>
@@ -187,9 +171,9 @@
                     <div class="col-6 text-center">
                         <?php
                         if ($page == $numberOfPages){
-                            echo '<a class="disabled" href="friendadd.php?page='.($page+1).'">'.Next.'</a>';
+                            echo '<a class="disabled" href="friendadd.php?page='.($page+1).'">Next</a>';
                         } else{
-                            echo '<a href="friendadd.php?page='.($page+1).'">'.Next.'</a>';
+                            echo '<a href="friendadd.php?page='.($page+1).'">Next</a>';
                         }
                         ?>
                     </div>
@@ -204,7 +188,7 @@
                     </div>
                 </div>
 
-            <? else: ?>
+            <?php else: ?>
                 <div class='row'><div class='col-12 text-danger text-center'><p> MESSAGE: Please Log In or Sign Up to access My Friend System</p></div></div>
                 <div class="row">
                     <div class="col-4 text-right">
@@ -218,7 +202,7 @@
                         <a href="index.php">Home</a>
                     </div>
                 </div>
-            <? endif; ?>
+            <?php endif; ?>
         </div>
     </div>
 </body>
